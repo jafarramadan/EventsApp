@@ -1,0 +1,98 @@
+﻿@model EventsApp.Models.Subscribe
+
+@{
+    ViewData["Title"] = "Create Registration";
+}
+
+<div class="container mt-5">
+    <!-- Title and Event List -->
+    <h1 class="text-center mb-4">Create Registration</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h4 class="text-center mb-4">Available Events</h4>
+            <ul class="list-group mb-5">
+                @foreach (var eventItem in ViewBag.EventsList)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="event-details">
+                            <h5 class="mb-1">@eventItem.Title</h5>
+                            <p class="mb-0"><strong>Date:</strong> @eventItem.Date</p>
+                            <p class="mb-0">@eventItem.Description</p>
+                        </div>
+                        <button class="btn btn-primary subscribe-button"
+                                data-event-id="@eventItem.EventId">
+                            Subscribe
+                        </button>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Subscription Form (hidden until triggered) -->
+    <div class="row justify-content-center" id="registrationForm" style="display:none;">
+        <div class="col-md-6">
+            <form asp-action="Create" method="post" id="subscriptionForm" class="bg-light p-4 rounded shadow-sm">
+                <input type="hidden" asp-for="EventId" />
+                <input type="hidden" asp-for="ParticipantName" value="@ViewData["UserName"]" />
+                <input type="hidden" asp-for="Email" value="@ViewData["UserEmail"]" />
+
+                <div class="form-group mt-3">
+                    <input type="submit" value="Confirm Subscription" class="btn btn-primary btn-block" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back to List Button -->
+    <div class="mt-4 text-center">
+        <a asp-action="Index" class="btn btn-link">Back to List</a>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Subscription</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Are you sure you want to subscribe to this event?</p>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSubscribeButton">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        // Show confirmation modal when the subscribe button is clicked
+        document.querySelectorAll('.subscribe-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const eventId = this.getAttribute('data-event-id');
+
+                // Set the hidden event ID in the form
+                document.querySelector('input[name="EventId"]').value = eventId;
+
+                // Show the confirmation modal
+                $('#confirmationModal').modal('show');
+            });
+        });
+
+        // Confirm subscription and submit the form
+        document.getElementById('confirmSubscribeButton').addEventListener('click', function () {
+            // Submit the form
+            document.getElementById('subscriptionForm').submit();
+        });
+    </script>
+}
